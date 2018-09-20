@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Mirrored from localhost:2368/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 20 Sep 2018 07:25:37 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Solaris 11.2 下禁用 LSI 9211-8i SAS HBA卡的 SATA NCQ</title>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="../assets/built/screen300c.css?v=74d9b5f109" />
+
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+    <link rel="canonical" href="http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/amp/" />
+    
+    <meta property="og:site_name" content="Zulus" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Solaris 11.2 下禁用 LSI 9211-8i SAS HBA卡的 SATA NCQ" />
+    <meta property="og:description" content="为什么禁用SATA NCQ呢？ 我的LSI 9211-8i 下挂6个 SATA 硬盘，在 Nexentastor 4.0.3 下， zpool 间大数据复制时系统就 hang 住.... 在安装 Nexentastor 前对 LSI 9211-8i 的固件进行过升级，从P17_IT升到了P20_IT。 于是首先怀疑固件兼容性，将固件降到了P17_IT，问题依旧.... 接着怀疑 Nextenstor 的问题。换装 OmniOS 还是老问题。最后装 Solaris 11.2 问题依旧.... 实在没辙了，乍办呢。 忽然想到 LSI 9211-8i SAS --&amp;gt; SATA，" />
+    <meta property="og:url" content="http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/" />
+    <meta property="article:published_time" content="2014-12-22T05:13:00.000Z" />
+    <meta property="article:modified_time" content="2016-07-20T05:14:24.000Z" />
+    <meta property="article:tag" content="Solaris" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Solaris 11.2 下禁用 LSI 9211-8i SAS HBA卡的 SATA NCQ" />
+    <meta name="twitter:description" content="为什么禁用SATA NCQ呢？ 我的LSI 9211-8i 下挂6个 SATA 硬盘，在 Nexentastor 4.0.3 下， zpool 间大数据复制时系统就 hang 住.... 在安装 Nexentastor 前对 LSI 9211-8i 的固件进行过升级，从P17_IT升到了P20_IT。 于是首先怀疑固件兼容性，将固件降到了P17_IT，问题依旧.... 接着怀疑 Nextenstor 的问题。换装 OmniOS 还是老问题。最后装 Solaris 11.2 问题依旧.... 实在没辙了，乍办呢。 忽然想到 LSI 9211-8i SAS --&amp;gt; SATA，" />
+    <meta name="twitter:url" content="http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Nathan Lu" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="Solaris" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Zulus",
+        "logo": "http://zulus.me/favicon.ico"
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Nathan Lu",
+        "image": {
+            "@type": "ImageObject",
+            "url": "http://zulus.me/content/images/2018/04/a003-1.gif",
+            "width": 336,
+            "height": 336
+        },
+        "url": "http://zulus.me/author/nathan-lu/",
+        "sameAs": []
+    },
+    "headline": "Solaris 11.2 下禁用 LSI 9211-8i SAS HBA卡的 SATA NCQ",
+    "url": "http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/",
+    "datePublished": "2014-12-22T05:13:00.000Z",
+    "dateModified": "2016-07-20T05:14:24.000Z",
+    "keywords": "Solaris",
+    "description": "为什么禁用SATA NCQ呢？ 我的LSI 9211-8i 下挂6个 SATA 硬盘，在 Nexentastor 4.0.3 下， zpool 间大数据复制时系统就 hang 住.... 在安装 Nexentastor 前对 LSI 9211-8i 的固件进行过升级，从P17_IT升到了P20_IT。 于是首先怀疑固件兼容性，将固件降到了P17_IT，问题依旧.... 接着怀疑 Nextenstor 的问题。换装 OmniOS 还是老问题。最后装 Solaris 11.2 问题依旧.... 实在没辙了，乍办呢。 忽然想到 LSI 9211-8i SAS --&amp;gt; SATA，",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://zulus.me/"
+    }
+}
+    </script>
+
+    <script type="text/javascript" src="../public/ghost-sdk.min300c.js?v=74d9b5f109"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "f2061822bfca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.22" />
+    <link rel="alternate" type="application/rss+xml" title="Zulus" href="http://zulus.me/rss/" />
+
+</head>
+<body class="post-template tag-solaris">
+
+    <div class="site-wrapper">
+
+        
+
+<header class="site-header outer">
+    <div class="inner">
+        <nav class="site-nav">
+    <div class="site-nav-left">
+                <a class="site-nav-logo" href="http://zulus.me/">Zulus</a>
+            <ul class="nav" role="menu">
+    <li class="nav-home" role="menuitem"><a href="http://zulus.me/">Home</a></li>
+</ul>
+
+    </div>
+    <div class="site-nav-right">
+        <div class="social-links">
+        </div>
+            <a class="rss-button" href="https://feedly.com/i/subscription/feed/http://zulus.me/rss/" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+</a>
+    </div>
+</nav>
+    </div>
+</header>
+
+
+<main id="site-main" class="site-main outer" role="main">
+    <div class="inner">
+
+        <article class="post-full post tag-solaris no-image">
+
+            <header class="post-full-header">
+                <section class="post-full-meta">
+                    <time class="post-full-meta-date" datetime="2014-12-22">22 December 2014</time>
+                        <span class="date-divider">/</span> <a href="../tag/solaris/index.html">Solaris</a>
+                </section>
+                <h1 class="post-full-title">Solaris 11.2 下禁用 LSI 9211-8i SAS HBA卡的 SATA NCQ</h1>
+            </header>
+
+
+            <section class="post-full-content">
+                <div class="kg-card-markdown"><p><strong>为什么禁用SATA NCQ呢？</strong></p>
+<p>我的LSI 9211-8i 下挂6个 SATA 硬盘，在 Nexentastor 4.0.3 下， zpool 间大数据复制时系统就 hang 住....</p>
+<p>在安装 Nexentastor 前对 LSI 9211-8i 的固件进行过升级，从P17_IT升到了P20_IT。</p>
+<p>于是首先怀疑固件兼容性，将固件降到了P17_IT，问题依旧....</p>
+<p>接着怀疑 Nextenstor 的问题。换装 OmniOS 还是老问题。最后装 Solaris 11.2 问题依旧....</p>
+<p>实在没辙了，乍办呢。</p>
+<p>忽然想到 LSI 9211-8i SAS --&gt; SATA，是不是 SATA NCQ 引起问题呢？</p>
+<p>顺着这个思路去查看 LSI 9211-8i SATA NCQ 设置，BIOS 中没找到....Solaris 下 megaCLI/StorCLI 不认卡....</p>
+<p>幸好有 lsiutil (LSI Logic MPT Configuration Utility)，找到了 1.63 版，在 Solaris 11.2 下可以运行：</p>
+<pre><code>root@solaris:~# ./lsiutil
+
+LSI Logic MPT Configuration Utility, Version 1.63, June 4, 2009
+
+1 MPT Port found
+
+   Port Name Chip Vendor/Type/Rev  MPT Rev  Firmware Rev  IOC
+ 1.mpt_sas0  LSI Logic SAS2008 03  200      11000100       0
+
+Select a device:  [1-1 or 0 to quit]  
+</code></pre>
+<p>发现1块 LSI 9211-8i ， 按 <strong>1</strong> 选择HBA卡：</p>
+<pre><code> Select a device:  [1-1 or 0 to quit] 1
+
+  1.Identify firmware, BIOS, and/or FCode
+  2.Download firmware (update the FLASH)
+  4.Download/erase BIOS and/or FCode (update the FLASH)
+  8.Scan for devices
+ 10.Change IOC settings (interrupt coalescing)
+ 13.Change SAS IO Unit settings
+ 16.Display attached devices
+ 20.Diagnostics
+ 21.RAID actions
+ 23.Reset target
+ 42.Display operating system names for devices
+ 43.Diagnostic Buffer actions
+ 45.Concatenate SAS firmware and NVDATA files
+ 59.Dump PCI config space
+ 60.Show non-default settings
+ 61.Restore default settings
+ 66.Show SAS discovery errors
+ 69.Show board manufacturing information
+ 97.Reset SAS link, HARD RESET
+ 98.Reset SAS link
+ 99.Reset port
+ e   Enable expert mode in menus
+ p   Enable paged mode
+ w   Enable logging
+
+Main menu, select an option:  [1-99 or e/p/w or 0 to quit]  
+</code></pre>
+<p>按 <strong>e</strong> 进入专家模式：</p>
+<pre><code>Enabled expert mode in menus
+
+  1.Identify firmware, BIOS, and/or FCode
+  2.Download firmware (update the FLASH)
+  3.Upload firmware
+  4.Download/erase BIOS and/or FCode (update the FLASH)
+  5.Upload BIOS and/or FCode
+  6.Download SEEPROM
+  7.Upload SEEPROM
+  8.Scan for devices
+  9.Read/change configuration pages
+ 10.Change IOC settings (interrupt coalescing)
+ 13.Change SAS IO Unit settings
+ 14.Change IO Unit settings (multi-pathing, queuing, caching)
+ 16.Display attached devices
+ 17.Show expander routing tables
+ 18.Change SAS WWID
+ 19.Test configuration page actions
+ 20.Diagnostics
+ 21.RAID actions
+ 23.Reset target
+ 24.Clear ACA
+ 33.Erase non-volatile adapter storage
+ 34.Remove device from initiator table
+ 35.Display Log entries
+ 36.Clear (erase) Log entries
+ 37.Force full discovery
+ 40.Display current events
+ 42.Display operating system names for devices
+ 43.Diagnostic Buffer actions
+ 44.Program manufacturing information
+ 45.Concatenate SAS firmware and NVDATA files
+ 46.Upload FLASH section
+ 47.Display version information
+ 48.Display chip VPD information
+ 49.Program chip VPD information
+ 50.Dump MPT registers
+ 51.Dump chip memory regions
+ 52.Read/modify chip memory locations
+ 54.Identify FLASH device
+ 55.Force firmware to fault (with C0FFEE)
+ 56.Read/write expander memory
+ 57.Read/write expander ISTWI device
+ 58.Alta diagnostics
+ 59.Dump PCI config space
+ 60.Show non-default settings
+ 61.Restore default settings
+ 66.Show SAS discovery errors
+ 67.Dump all port state
+ 68.Show port state summary
+ 69.Show board manufacturing information
+ 70.Dump all device pages
+ 80.Set SAS phy offline
+ 81.Set SAS phy online
+ 90.Send SCSI CDB
+ 95.Send SATA request
+ 96.Send SMP request
+ 97.Reset SAS link, HARD RESET
+ 98.Reset SAS link
+ 99.Reset port
+  e   Disable expert mode in menus
+  p   Enable paged mode
+  w   Enable logging
+
+Main menu, select an option:  [1-99 or e/p/w or 0 to quit]  
+</code></pre>
+<p>多出好多 Menu，专家模式就是高大上！<br>
+选择 <strong>14.  Change IO Unit settings (multi-pathing, queuing, caching)</strong></p>
+<pre><code>Multi-pathing:  [0=Disabled, 1=Enabled, default is 0]  
+</code></pre>
+<p>多路径，默认是关闭的，按 <strong>回车</strong> 继续</p>
+<pre><code>SATA Native Command Queuing:  [0=Disabled, 1=Enabled, default is 0]  
+</code></pre>
+<p>终于到 <strong>NCQ</strong> 了，先前是开启的，关闭！ <strong>回车</strong> 继续</p>
+<pre><code>SATA Write Caching:  [0=Disabled, 1=Enabled, default is 0]  
+</code></pre>
+<p>SATA 写缓存，先前是开启的，顺便也把它关闭了。 <strong>回车</strong> 继续</p>
+<pre><code>Main menu, select an option:  [1-99 or e/p/w or 0 to quit] 68  
+</code></pre>
+<p>选 <strong>68.  Show port state summary</strong>  查看状态，确认修改：</p>
+<pre><code>Current Port State
+------------------
+SAS2008's links are down, 6.0 G, 6.0 G, 6.0 G, 6.0 G, 6.0 G, down, 6.0 G
+
+Software Version Information
+----------------------------
+Current active firmware version is 11000100 (17.00.01)
+Firmware image's version is MPTFW-17.00.01.00-IT
+  LSI Logic
+  Not Packaged Yet
+x86 BIOS image's version is MPT2BIOS-7.33.00.00 (2013.07.18)
+
+Firmware Settings
+-----------------
+SAS WWID:   ****************
+Multi-pathing:  Disabled
+SATA Native Command Queuing:Disabled
+SATA Write Caching: Disabled
+SATA Maximum Queue Depth:   32
+SAS Max Queue Depth, Narrow:0
+SAS Max Queue Depth, Wide:  0
+Device Missing Report Delay:0 seconds
+Device Missing I/O Delay:   0 seconds
+Phy Parameters for Phynum:  01234567
+  Link Enabled: Yes  Yes  Yes  Yes  Yes  Yes  Yes  Yes  
+  Link Min Rate:1.5  1.5  1.5  1.5  1.5  1.5  1.5  1.5  
+  Link Max Rate:6.0  6.0  6.0  6.0  6.0  6.0  6.0  6.0  
+  SSP Initiator Enabled:Yes  Yes  Yes  Yes  Yes  Yes  Yes  Yes  
+  SSP Target Enabled:   No   No   No   No   No   No   No   No   
+  Port Configuration:   Auto Auto Auto Auto Auto Auto Auto Auto 
+Interrupt Coalescing:   Enabled, timeout is 10 us, depth is 4
+
+Main menu, select an option:  [1-99 or e/p/w or 0 to quit]  
+</code></pre>
+<p>现在 <strong>SATA Native Command Queuing、SATA Write Caching</strong> 都已经在 Disabled 状态了。</p>
+<p>最后，也是最重要的，选择 <strong>99.  Reset port</strong> ，重启一下 HBA 卡，让设置生效。</p>
+<p>测试了一下先前的问题，两个 zpool 间复制了近 <strong>3T</strong> 的数据一点问题都没有^_^</p>
+</div>
+            </section>
+
+
+            <footer class="post-full-footer">
+
+                <section class="author-card">
+                        <img class="author-profile-image" src="../content/images/2018/04/a003-1.gif" alt="Nathan Lu" />
+                    <section class="author-card-content">
+                        <h4 class="author-card-name"><a href="../author/nathan-lu/index.html">Nathan Lu</a></h4>
+                            <p>70后上海人，混国企IT，技术宅。</p>
+                    </section>
+                </section>
+                <div class="post-full-footer-right">
+                    <a class="author-card-button" href="../author/nathan-lu/index.html">Read More</a>
+                </div>
+
+            </footer>
+
+
+        </article>
+
+    </div>
+</main>
+
+<aside class="read-next outer">
+    <div class="inner">
+        <div class="read-next-feed">
+                <article class="read-next-card"
+                            style="background-image: url(../content/images/2018/04/IMGP0195-1.jpg)"
+                >
+                    <header class="read-next-card-header">
+                        <small class="read-next-card-header-sitetitle">&mdash; Zulus &mdash;</small>
+                        <h3 class="read-next-card-header-title"><a href="../tag/solaris/index.html">Solaris</a></h3>
+                    </header>
+                    <div class="read-next-divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 14.5s2 3 5 3 5.5-2.463 5.5-5.5S21 6.5 18 6.5c-5 0-7 11-12 11C2.962 17.5.5 15.037.5 12S3 6.5 6 6.5s4.5 3.5 4.5 3.5"/></svg>
+</div>
+                    <div class="read-next-card-content">
+                        <ul>
+                            <li><a href="../solarisxia-cha-kan-xi-tong-li-de-yong-hu-he-zu-2/index.html">Solaris下查看系统里的用户和组</a></li>
+                        </ul>
+                    </div>
+                    <footer class="read-next-card-footer">
+                        <a href="../tag/solaris/index.html">1 post →</a>
+                    </footer>
+                </article>
+
+                <article class="post-card post tag-owncloud no-image">
+    <div class="post-card-content">
+        <a class="post-card-content-link" href="../owncloud-sheng-ji-zhi-9-1/index.html">
+            <header class="post-card-header">
+                    <span class="post-card-tags">ownCloud</span>
+                <h2 class="post-card-title">ownCloud 升级至9.1</h2>
+            </header>
+            <section class="post-card-excerpt">
+                <p>前阵子在家里的 NAS（FreeBSD 10.3 ）上部署了 ownCloud 9.0.4。 今天手痒，手动升级到最新的 9.1，碰到了点问题。 用命令行（occ upgrade）升级时报错: Error: Call to undefined method OCA\Federation\AppInfo\Application::setupCron() in /var/www/owncloud/</p>
+            </section>
+        </a>
+        <footer class="post-card-meta">
+                <img class="author-profile-image" src="../content/images/2018/04/a003-1.gif" alt="Nathan Lu" />
+            <span class="post-card-author"><a href="../author/nathan-lu/index.html">Nathan Lu</a></span>
+        </footer>
+    </div>
+</article>
+
+                <article class="post-card post tag-nexentastor no-image">
+    <div class="post-card-content">
+        <a class="post-card-content-link" href="../nexentastorxia-huo-qu-zhen-zheng-de-rootquan-xian/index.html">
+            <header class="post-card-header">
+                    <span class="post-card-tags">NexentaStor</span>
+                <h2 class="post-card-title">NexentaStor下获取真正的root权限</h2>
+            </header>
+            <section class="post-card-excerpt">
+                <p>NexentaStor 是 Solaris 开源分支的一个封装发行版本。 默认的控制台是NMC shell，如果要进入UNIX bash，可以这么做： 用root账号登录，然后..... nmc@homenas:/$ option expert_mode = 1 nmc@homenas:/$ !bash You are about to enter the Unix (&quot;raw&quot;) shell and execute</p>
+            </section>
+        </a>
+        <footer class="post-card-meta">
+                <img class="author-profile-image" src="../content/images/2018/04/a003-1.gif" alt="Nathan Lu" />
+            <span class="post-card-author"><a href="../author/nathan-lu/index.html">Nathan Lu</a></span>
+        </footer>
+    </div>
+</article>
+
+        </div>
+    </div>
+</aside>
+
+<div class="floating-header">
+    <div class="floating-header-logo">
+        <a href="http://zulus.me/">
+            <span>Zulus</span>
+        </a>
+    </div>
+    <span class="floating-header-divider">&mdash;</span>
+    <div class="floating-header-title">Solaris 11.2 下禁用 LSI 9211-8i SAS HBA卡的 SATA NCQ</div>
+    <div class="floating-header-share">
+        <div class="floating-header-share-label">Share this <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M7.5 15.5V4a1.5 1.5 0 1 1 3 0v4.5h2a1 1 0 0 1 1 1h2a1 1 0 0 1 1 1H18a1.5 1.5 0 0 1 1.5 1.5v3.099c0 .929-.13 1.854-.385 2.748L17.5 23.5h-9c-1.5-2-5.417-8.673-5.417-8.673a1.2 1.2 0 0 1 1.76-1.605L7.5 15.5zm6-6v2m-3-3.5v3.5m6-1v2"/>
+</svg>
+</div>
+        <a class="floating-header-share-tw" href="https://twitter.com/share?text=Solaris%2011.2%20%E4%B8%8B%E7%A6%81%E7%94%A8%20LSI%209211-8i%20SAS%20HBA%E5%8D%A1%E7%9A%84%20SATA%20NCQ&amp;url=http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/"
+            onclick="window.open(this.href, 'share-twitter', 'width=550,height=235');return false;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M30.063 7.313c-.813 1.125-1.75 2.125-2.875 2.938v.75c0 1.563-.188 3.125-.688 4.625a15.088 15.088 0 0 1-2.063 4.438c-.875 1.438-2 2.688-3.25 3.813a15.015 15.015 0 0 1-4.625 2.563c-1.813.688-3.75 1-5.75 1-3.25 0-6.188-.875-8.875-2.625.438.063.875.125 1.375.125 2.688 0 5.063-.875 7.188-2.5-1.25 0-2.375-.375-3.375-1.125s-1.688-1.688-2.063-2.875c.438.063.813.125 1.125.125.5 0 1-.063 1.5-.25-1.313-.25-2.438-.938-3.313-1.938a5.673 5.673 0 0 1-1.313-3.688v-.063c.813.438 1.688.688 2.625.688a5.228 5.228 0 0 1-1.875-2c-.5-.875-.688-1.813-.688-2.75 0-1.063.25-2.063.75-2.938 1.438 1.75 3.188 3.188 5.25 4.25s4.313 1.688 6.688 1.813a5.579 5.579 0 0 1 1.5-5.438c1.125-1.125 2.5-1.688 4.125-1.688s3.063.625 4.188 1.813a11.48 11.48 0 0 0 3.688-1.375c-.438 1.375-1.313 2.438-2.563 3.188 1.125-.125 2.188-.438 3.313-.875z"/></svg>
+        </a>
+        <a class="floating-header-share-fb" href="https://www.facebook.com/sharer/sharer.php?u=http://zulus.me/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/"
+            onclick="window.open(this.href, 'share-facebook','width=580,height=296');return false;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M19 6h5V0h-5c-3.86 0-7 3.14-7 7v3H8v6h4v16h6V16h5l1-6h-6V7c0-.542.458-1 1-1z"/></svg>
+        </a>
+    </div>
+    <progress class="progress" value="0">
+        <div class="progress-container">
+            <span class="progress-bar"></span>
+        </div>
+    </progress>
+</div>
+
+
+
+
+        <footer class="site-footer outer">
+            <div class="site-footer-content inner">
+                <section class="copyright"><a href="http://zulus.me/">Zulus</a> &copy; 2018</section>
+                <nav class="site-footer-nav">
+                    <a href="http://zulus.me/">Latest Posts</a>
+                    
+                    
+                    <a href="https://ghost.org/" target="_blank" rel="noopener">Ghost</a>
+                </nav>
+            </div>
+        </footer>
+
+    </div>
+
+
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="../assets/js/jquery.fitvids300c.js?v=74d9b5f109"></script>
+
+
+    
+
+    
+
+</body>
+
+<!-- Mirrored from localhost:2368/solaris-11-2-xia-jin-yong-lsi-9211-8i-sas-hbaqia-de-sata-ncq/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 20 Sep 2018 07:25:37 GMT -->
+</html>

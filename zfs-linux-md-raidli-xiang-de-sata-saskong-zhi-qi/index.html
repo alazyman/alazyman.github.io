@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Mirrored from localhost:2368/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 20 Sep 2018 07:25:40 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>ZFS / Linux MD RAID理想的SATA/SAS控制器</title>
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="../assets/built/screen300c.css?v=74d9b5f109" />
+
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon" />
+    <link rel="canonical" href="http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/amp/" />
+    
+    <meta property="og:site_name" content="Zulus" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="ZFS / Linux MD RAID理想的SATA/SAS控制器" />
+    <meta property="og:description" content="翻译自http://blog.zorinaq.com/?e&#x3D;10 ，**版权属于原文作者！**有少量的删减。 [最后更新于2012-06-03] 作者需要很多的可靠和廉价的存储空间（媒体收集，备份）。硬件RAID往往昂贵和笨重。他感受了不少在Solaris / FreeBSD上的ZFS和Linux MD RAID的优势： 性能 在许多情况下，软件RAID和硬件RAID一样快，有时侯甚至更快，因为操作系统知道RAID布局，从而可以优化RAID的I/O模式。事实上，即使是最计算密集型的RAID5或RAID6在奇偶校验上CPU的开销对于现代处理器来说可以忽略不计。一个具体的例子，Linux2.6.32中，Phenom II X4 945 3.0GHz CPU在RAID6寄偶校验上的速度接近8GB/s每核心（在dmesg中显示： &amp;quot;raid6: using algorithm sse2x4 (7976 MB/s)&amp;quot;）。因此，实现了在Linux" />
+    <meta property="og:url" content="http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/" />
+    <meta property="article:published_time" content="2013-05-20T05:00:00.000Z" />
+    <meta property="article:modified_time" content="2018-04-13T04:34:46.000Z" />
+    <meta property="article:tag" content="ZFS" />
+    <meta property="article:tag" content="FreeBSD" />
+    <meta property="article:tag" content="Linux" />
+    <meta property="article:tag" content="RAID" />
+    
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ZFS / Linux MD RAID理想的SATA/SAS控制器" />
+    <meta name="twitter:description" content="翻译自http://blog.zorinaq.com/?e&#x3D;10 ，**版权属于原文作者！**有少量的删减。 [最后更新于2012-06-03] 作者需要很多的可靠和廉价的存储空间（媒体收集，备份）。硬件RAID往往昂贵和笨重。他感受了不少在Solaris / FreeBSD上的ZFS和Linux MD RAID的优势： 性能 在许多情况下，软件RAID和硬件RAID一样快，有时侯甚至更快，因为操作系统知道RAID布局，从而可以优化RAID的I/O模式。事实上，即使是最计算密集型的RAID5或RAID6在奇偶校验上CPU的开销对于现代处理器来说可以忽略不计。一个具体的例子，Linux2.6.32中，Phenom II X4 945 3.0GHz CPU在RAID6寄偶校验上的速度接近8GB/s每核心（在dmesg中显示： &amp;quot;raid6: using algorithm sse2x4 (7976 MB/s)&amp;quot;）。因此，实现了在Linux" />
+    <meta name="twitter:url" content="http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Nathan Lu" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="ZFS, FreeBSD, Linux, RAID" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Zulus",
+        "logo": "http://zulus.me/favicon.ico"
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Nathan Lu",
+        "image": {
+            "@type": "ImageObject",
+            "url": "http://zulus.me/content/images/2018/04/a003-1.gif",
+            "width": 336,
+            "height": 336
+        },
+        "url": "http://zulus.me/author/nathan-lu/",
+        "sameAs": []
+    },
+    "headline": "ZFS / Linux MD RAID理想的SATA/SAS控制器",
+    "url": "http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/",
+    "datePublished": "2013-05-20T05:00:00.000Z",
+    "dateModified": "2018-04-13T04:34:46.000Z",
+    "keywords": "ZFS, FreeBSD, Linux, RAID",
+    "description": "翻译自http://blog.zorinaq.com/?e&#x3D;10 ，**版权属于原文作者！**有少量的删减。 [最后更新于2012-06-03] 作者需要很多的可靠和廉价的存储空间（媒体收集，备份）。硬件RAID往往昂贵和笨重。他感受了不少在Solaris / FreeBSD上的ZFS和Linux MD RAID的优势： 性能 在许多情况下，软件RAID和硬件RAID一样快，有时侯甚至更快，因为操作系统知道RAID布局，从而可以优化RAID的I/O模式。事实上，即使是最计算密集型的RAID5或RAID6在奇偶校验上CPU的开销对于现代处理器来说可以忽略不计。一个具体的例子，Linux2.6.32中，Phenom II X4 945 3.0GHz CPU在RAID6寄偶校验上的速度接近8GB/s每核心（在dmesg中显示： &amp;quot;raid6: using algorithm sse2x4 (7976 MB/s)&amp;quot;）。因此，实现了在Linux",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://zulus.me/"
+    }
+}
+    </script>
+
+    <script type="text/javascript" src="../public/ghost-sdk.min300c.js?v=74d9b5f109"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "f2061822bfca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.22" />
+    <link rel="alternate" type="application/rss+xml" title="Zulus" href="http://zulus.me/rss/" />
+
+</head>
+<body class="post-template tag-zfs tag-freebsd tag-linux tag-raid">
+
+    <div class="site-wrapper">
+
+        
+
+<header class="site-header outer">
+    <div class="inner">
+        <nav class="site-nav">
+    <div class="site-nav-left">
+                <a class="site-nav-logo" href="http://zulus.me/">Zulus</a>
+            <ul class="nav" role="menu">
+    <li class="nav-home" role="menuitem"><a href="http://zulus.me/">Home</a></li>
+</ul>
+
+    </div>
+    <div class="site-nav-right">
+        <div class="social-links">
+        </div>
+            <a class="rss-button" href="https://feedly.com/i/subscription/feed/http://zulus.me/rss/" target="_blank" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+</a>
+    </div>
+</nav>
+    </div>
+</header>
+
+
+<main id="site-main" class="site-main outer" role="main">
+    <div class="inner">
+
+        <article class="post-full post tag-zfs tag-freebsd tag-linux tag-raid no-image">
+
+            <header class="post-full-header">
+                <section class="post-full-meta">
+                    <time class="post-full-meta-date" datetime="2013-05-20">20 May 2013</time>
+                        <span class="date-divider">/</span> <a href="../tag/zfs/index.html">ZFS</a>
+                </section>
+                <h1 class="post-full-title">ZFS / Linux MD RAID理想的SATA/SAS控制器</h1>
+            </header>
+
+
+            <section class="post-full-content">
+                <div class="kg-card-markdown"><blockquote>
+<p>翻译自<a href="http://blog.zorinaq.com/?e=10">http://blog.zorinaq.com/?e=10</a> ，**版权属于原文作者！**有少量的删减。</p>
+</blockquote>
+<p>[最后更新于2012-06-03]</p>
+<p>作者需要很多的可靠和廉价的存储空间（媒体收集，备份）。硬件RAID往往昂贵和笨重。他感受了不少在Solaris / FreeBSD上的ZFS和Linux MD RAID的优势：</p>
+<h4 id="">性能</h4>
+<p>在许多情况下，软件RAID和硬件RAID一样快，有时侯甚至更快，因为操作系统知道RAID布局，从而可以优化RAID的I/O模式。事实上，即使是最计算密集型的RAID5或RAID6在奇偶校验上CPU的开销对于现代处理器来说可以忽略不计。一个具体的例子，Linux2.6.32中，Phenom II X4 945 3.0GHz CPU在RAID6寄偶校验上的速度接近8GB/s每核心（在dmesg中显示： &quot;raid6: using algorithm sse2x4 (7976 MB/s)&quot;）。因此，实现了在Linux MD RAID6阵列500MB/s的吞吐量，而用于奇偶校验的CPU开销却不到1.5％。现在关于优化I/O模式，有个有趣的故事：成立初期的Youtube，扩展其基础设施的举措之一就是将他们的数据库服务器从硬件RAID切换到软件RAID，他们发现I/O吞吐量提高了20-30％。</p>
+<h4 id="">扩展性</h4>
+<p>ZFS和Linux MD RAID允许跨多个磁盘控制器或多个SAN设备创建阵列，减轻在PCIe链路或GbE链路吞吐量上可能出现的瓶颈。而硬件RAID限制到一个单一的控制器，无扩展余地。</p>
+<h4 id="">可靠性</h4>
+<p>No hardware RAID = one less hardware component that can fail.<br>
+非硬件RAID = 更少的会出故障的硬件（我是这么理解的，不知道妥否？）</p>
+<h4 id="">数据恢复简便</h4>
+<p>只要将磁盘插入任何服务器，数据就可以被恢复。不依赖于任何一个特定的RAID控制器。</p>
+<h4 id="">灵活性</h4>
+<p>可以在系统中任意磁盘控制器上的任意磁盘创建阵列，也可以将磁盘从一个控制器移到另一个控制器。</p>
+<h4 id="">管理便捷</h4>
+<p>只要学习使用一种管理工具：zpool或mdadm就可管理阵列。不在需要安装专门的管理工具，或重启进入BIOS来管理阵列。</p>
+<h4 id="">成本</h4>
+<p>不需要购买昂贵的硬件RAID控制器显然会很便宜。</p>
+<p>因此，许多ZFS和Linux MD RAID的使用者，包括作者，一直在寻找简单可靠，速度快，价格便宜，没有花里胡哨功能的非RAID控制器。大多数主板有多达4或6个板载端口（一定要在BIOS中启用AHCI模式，这是精心设计的高级主机控制器接口，操作系统可以使用该接口来发挥最大的性能）但是对于超过4或6个磁盘，没有太多的选择。多年来，本文作者已经花了相当长的一段时间在访问控制器制造商的网站，LKML，LINUX-IDE和ZFS的邮件列表上，从而建立了一个清单，列出了ZFS或Linux MD RAID理想的SATA/SAS控制器。清单同时也列出了在线零售商的链接，因为有些控制器在网上不容易找得到。</p>
+<p>清单中包含SAS控制器，因为它们和SATA控制器一样，也是一种好选择。有很多SAS控制器和SATA控制器一样廉价（即使它们是针对企业市场的），它们完全兼容SATA3Gbps和6Gbps的磁盘，支持所有常用的功能：热插拔，队列等。SAS控制器通常使用SFF-8087接口，也被称为internal mini SAS连接器，或iPASS连接器。使用内置SFF-8087到4xSATA的正向数据线（非反向）可连接多达4个SATA磁盘到控制器的SFF-8087接口。这种类型的电缆通常售价为15-30美元。</p>
+<p>事实上在市场上只有4个重要的非RAID SATA/SAS控制器独立芯片制造商，LSI、Marvell、JMicron（智微）、Silicon Image。控制器卡制造商像Adaptec、HighPoint、英特尔、超微、泰安等，几乎都是使用这4家芯片制造商的芯片。</p>
+<p>清单列出了从2端口到16端口，Linux和Solaris系统下内核驱动支持的，以及FreeBSD系统下有限支持的的非RAID SATA/SAS控制器。作者只关注原生PCIe的控制器，很少专注PCI-X的（事实上有1个PCI-X控制器是非常流行的：88SX6081）。</p>
+<p>清单中**[xxx-xxxMB/s/port]**代表每端口预估的实际最大吞吐量（假设当控制卡所有端口都产生I/O并发，对Host Link或PCIe/PCI-X总线产生瓶颈时）。作者认为PCIe的控制卡可以达到PCIe总线最大理论吞吐量的60-70%，PCI-X的控制器可以达到PCI-X总线最大理论吞吐量的80%。作者在实际环境中将PCIe总线的Max Payload Size的设置为128或256字节（一种常见的默认值），提高或降低PCI-X总线的默认延迟进行基准测试，测试的结果论证了这种假设的成立。截至2010年5月，现代磁盘在盘片的外圈进行读写时可以轻易地达到120-130MB/s的持续吞吐量，如果你想将产生瓶颈的可能性降低至最低的话，要避免选择吞吐量小于150MB/s/port的控制器。</p>
+<h4 id="32">32 端口</h4>
+<ul>
+<li>[SAS] 4 x switched Marvell 88SE9485, 6Gbps, PCIe (gen2) x16 [150-175MB/s/port]<br>
+[2011-09-29 更新：HighPoint / RocketRAID 2782]</li>
+</ul>
+<blockquote>
+<p>Linux/Solaris/FreeBSD support: see Marvell 88SE9485 or 88SE9480 below</p>
+</blockquote>
+<h4 id="24">24 端口</h4>
+<ul>
+<li>[SAS] 3 x switched Marvell 88SE9485, 6Gbps, PCIe (gen2) x16 [200-233MB/s/port]<br>
+[2011-09-29 更新：HighPoint / RocketRAID 2760A]</li>
+</ul>
+<blockquote>
+<p>Linux/Solaris/FreeBSD support: see Marvell 88SE9485 or 88SE9480 below</p>
+</blockquote>
+<h4 id="16">16 端口</h4>
+<ul>
+<li>[SAS] LSI SAS2116, 6Gbps, PCIe (gen2) x8 [150-175MB/s/port]<br>
+LSI / LSISAS9200-16e,<br>
+[2010-10-27 更新：LSI / LSISAS9201-16i]</li>
+</ul>
+<blockquote>
+<p>Linux support: mpt2sas (2.6.30+)<br>
+Solaris support: mpt_sas (snv_137+)<br>
+FreeBSD support: mps (first in FreeBSD 9.0, then backported to 8.2-stable, and 8.1, 8.0, 7.4)[Added on 2011-09-29]</p>
+</blockquote>
+<ul>
+<li>[SAS] 2 x switched Marvell 88SE9485, 6Gbps, PCIe (gen2) x16 [300-350MB/s/port]<br>
+[2011-09-29 更新：HighPoint / RocketRAID 2740 and 2744]</li>
+</ul>
+<blockquote>
+<p>Linux/Solaris/FreeBSD support: see Marvell 88SE9485 or 88SE9480 below</p>
+</blockquote>
+<h4 id="8">8 端口</h4>
+<ul>
+<li>[SAS] Marvell 88SE9485 or 88SE9480, 6Gbps, PCIe (gen2) x8 [300-350MB/s/port]<br>
+[2011-07-01 更新：Supermicro / AOC-SAS2LP-MV8]<br>
+Areca / ARC-1320<br>
+HighPoint / RocketRAID 272x</li>
+</ul>
+<blockquote>
+<p>Linux support: mvsas (94xx: 2.6.31+, ARC-1320: 2.6.32+)<br>
+Solaris support: not supported (see 88SE6480)</p>
+</blockquote>
+<ul>
+<li>[SAS] LSI SAS2008, 6Gbps, PCIe (gen2) x8 [300-350MB/s/port]</li>
+</ul>
+<p><strong>To be continued</strong></p>
+</div>
+            </section>
+
+
+            <footer class="post-full-footer">
+
+                <section class="author-card">
+                        <img class="author-profile-image" src="../content/images/2018/04/a003-1.gif" alt="Nathan Lu" />
+                    <section class="author-card-content">
+                        <h4 class="author-card-name"><a href="../author/nathan-lu/index.html">Nathan Lu</a></h4>
+                            <p>70后上海人，混国企IT，技术宅。</p>
+                    </section>
+                </section>
+                <div class="post-full-footer-right">
+                    <a class="author-card-button" href="../author/nathan-lu/index.html">Read More</a>
+                </div>
+
+            </footer>
+
+
+        </article>
+
+    </div>
+</main>
+
+<aside class="read-next outer">
+    <div class="inner">
+        <div class="read-next-feed">
+                <article class="read-next-card"
+                            style="background-image: url(../content/images/2018/04/IMGP0195-1.jpg)"
+                >
+                    <header class="read-next-card-header">
+                        <small class="read-next-card-header-sitetitle">&mdash; Zulus &mdash;</small>
+                        <h3 class="read-next-card-header-title"><a href="../tag/zfs/index.html">ZFS</a></h3>
+                    </header>
+                    <div class="read-next-divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 14.5s2 3 5 3 5.5-2.463 5.5-5.5S21 6.5 18 6.5c-5 0-7 11-12 11C2.962 17.5.5 15.037.5 12S3 6.5 6 6.5s4.5 3.5 4.5 3.5"/></svg>
+</div>
+                    <div class="read-next-card-content">
+                        <ul>
+                            <li><a href="../zfshe-freebsd/index.html">ZFS和FreeBSD</a></li>
+                        </ul>
+                    </div>
+                    <footer class="read-next-card-footer">
+                        <a href="../tag/zfs/index.html">1 post →</a>
+                    </footer>
+                </article>
+
+                <article class="post-card post tag-ssd no-image">
+    <div class="post-card-content">
+        <a class="post-card-content-link" href="../toshiba-128g-ssd-ru-shou/index.html">
+            <header class="post-card-header">
+                    <span class="post-card-tags">SSD</span>
+                <h2 class="post-card-title">TOSHIBA 128G SSD 入手</h2>
+            </header>
+            <section class="post-card-excerpt">
+                <p>一直想买一块SSD。 这次 TOSHIBA THNSNH128GBST SSD 易迅特价￥679，还能用￥10的优惠券，到手￥669。果断出手！ 规格 128G SATA 6Gb 接口，2.5英寸（厚9.5mm） 东芝 19纳米 Toggle MLC 闪存 TC58NC5HA9GST 主控（Marvell），无缓存 Made In Philippines</p>
+            </section>
+        </a>
+        <footer class="post-card-meta">
+                <img class="author-profile-image" src="../content/images/2018/04/a003-1.gif" alt="Nathan Lu" />
+            <span class="post-card-author"><a href="../author/nathan-lu/index.html">Nathan Lu</a></span>
+        </footer>
+    </div>
+</article>
+
+                <article class="post-card post tag-dns no-image">
+    <div class="post-card-content">
+        <a class="post-card-content-link" href="../jiang-zi-ji-de-yu-ming-zhuan-ru-liao-dnspod/index.html">
+            <header class="post-card-header">
+                    <span class="post-card-tags">DNS</span>
+                <h2 class="post-card-title">将自己的域名转入了DNSPod</h2>
+            </header>
+            <section class="post-card-excerpt">
+                <p>自己的域名 zulus.me 是 Godaddy 上申请的，可是它的DNS服务器经常被墙。 有很多免费的DNS服务商可以选择，天朝的DNSpod 网上口碑还可以。 于是就将自己的域名转入了DNSPod ,让它的服务器做域名解析，无奈之举啊.....</p>
+            </section>
+        </a>
+        <footer class="post-card-meta">
+                <img class="author-profile-image" src="../content/images/2018/04/a003-1.gif" alt="Nathan Lu" />
+            <span class="post-card-author"><a href="../author/nathan-lu/index.html">Nathan Lu</a></span>
+        </footer>
+    </div>
+</article>
+
+        </div>
+    </div>
+</aside>
+
+<div class="floating-header">
+    <div class="floating-header-logo">
+        <a href="http://zulus.me/">
+            <span>Zulus</span>
+        </a>
+    </div>
+    <span class="floating-header-divider">&mdash;</span>
+    <div class="floating-header-title">ZFS / Linux MD RAID理想的SATA/SAS控制器</div>
+    <div class="floating-header-share">
+        <div class="floating-header-share-label">Share this <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M7.5 15.5V4a1.5 1.5 0 1 1 3 0v4.5h2a1 1 0 0 1 1 1h2a1 1 0 0 1 1 1H18a1.5 1.5 0 0 1 1.5 1.5v3.099c0 .929-.13 1.854-.385 2.748L17.5 23.5h-9c-1.5-2-5.417-8.673-5.417-8.673a1.2 1.2 0 0 1 1.76-1.605L7.5 15.5zm6-6v2m-3-3.5v3.5m6-1v2"/>
+</svg>
+</div>
+        <a class="floating-header-share-tw" href="https://twitter.com/share?text=ZFS%20%2F%20Linux%20MD%20RAID%E7%90%86%E6%83%B3%E7%9A%84SATA%2FSAS%E6%8E%A7%E5%88%B6%E5%99%A8&amp;url=http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/"
+            onclick="window.open(this.href, 'share-twitter', 'width=550,height=235');return false;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M30.063 7.313c-.813 1.125-1.75 2.125-2.875 2.938v.75c0 1.563-.188 3.125-.688 4.625a15.088 15.088 0 0 1-2.063 4.438c-.875 1.438-2 2.688-3.25 3.813a15.015 15.015 0 0 1-4.625 2.563c-1.813.688-3.75 1-5.75 1-3.25 0-6.188-.875-8.875-2.625.438.063.875.125 1.375.125 2.688 0 5.063-.875 7.188-2.5-1.25 0-2.375-.375-3.375-1.125s-1.688-1.688-2.063-2.875c.438.063.813.125 1.125.125.5 0 1-.063 1.5-.25-1.313-.25-2.438-.938-3.313-1.938a5.673 5.673 0 0 1-1.313-3.688v-.063c.813.438 1.688.688 2.625.688a5.228 5.228 0 0 1-1.875-2c-.5-.875-.688-1.813-.688-2.75 0-1.063.25-2.063.75-2.938 1.438 1.75 3.188 3.188 5.25 4.25s4.313 1.688 6.688 1.813a5.579 5.579 0 0 1 1.5-5.438c1.125-1.125 2.5-1.688 4.125-1.688s3.063.625 4.188 1.813a11.48 11.48 0 0 0 3.688-1.375c-.438 1.375-1.313 2.438-2.563 3.188 1.125-.125 2.188-.438 3.313-.875z"/></svg>
+        </a>
+        <a class="floating-header-share-fb" href="https://www.facebook.com/sharer/sharer.php?u=http://zulus.me/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/"
+            onclick="window.open(this.href, 'share-facebook','width=580,height=296');return false;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M19 6h5V0h-5c-3.86 0-7 3.14-7 7v3H8v6h4v16h6V16h5l1-6h-6V7c0-.542.458-1 1-1z"/></svg>
+        </a>
+    </div>
+    <progress class="progress" value="0">
+        <div class="progress-container">
+            <span class="progress-bar"></span>
+        </div>
+    </progress>
+</div>
+
+
+
+
+        <footer class="site-footer outer">
+            <div class="site-footer-content inner">
+                <section class="copyright"><a href="http://zulus.me/">Zulus</a> &copy; 2018</section>
+                <nav class="site-footer-nav">
+                    <a href="http://zulus.me/">Latest Posts</a>
+                    
+                    
+                    <a href="https://ghost.org/" target="_blank" rel="noopener">Ghost</a>
+                </nav>
+            </div>
+        </footer>
+
+    </div>
+
+
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="../assets/js/jquery.fitvids300c.js?v=74d9b5f109"></script>
+
+
+    <script>
+
+// NOTE: Scroll performance is poor in Safari
+// - this appears to be due to the events firing much more slowly in Safari.
+//   Dropping the scroll event and using only a raf loop results in smoother
+//   scrolling but continuous processing even when not scrolling
+$(document).ready(function () {
+    // Start fitVids
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+    // End fitVids
+
+    var progressBar = document.querySelector('progress');
+    var header = document.querySelector('.floating-header');
+    var title = document.querySelector('.post-full-title');
+
+    var lastScrollY = window.scrollY;
+    var lastWindowHeight = window.innerHeight;
+    var lastDocumentHeight = $(document).height();
+    var ticking = false;
+
+    function onScroll() {
+        lastScrollY = window.scrollY;
+        requestTick();
+    }
+
+    function onResize() {
+        lastWindowHeight = window.innerHeight;
+        lastDocumentHeight = $(document).height();
+        requestTick();
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(update);
+        }
+        ticking = true;
+    }
+
+    function update() {
+        var trigger = title.getBoundingClientRect().top + window.scrollY;
+        var triggerOffset = title.offsetHeight + 35;
+        var progressMax = lastDocumentHeight - lastWindowHeight;
+
+        // show/hide floating header
+        if (lastScrollY >= trigger + triggerOffset) {
+            header.classList.add('floating-active');
+        } else {
+            header.classList.remove('floating-active');
+        }
+
+        progressBar.setAttribute('max', progressMax);
+        progressBar.setAttribute('value', lastScrollY);
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    window.addEventListener('resize', onResize, false);
+
+    update();
+});
+</script>
+
+<script>
+
+// NOTE: Scroll performance is poor in Safari
+// - this appears to be due to the events firing much more slowly in Safari.
+//   Dropping the scroll event and using only a raf loop results in smoother
+//   scrolling but continuous processing even when not scrolling
+$(document).ready(function () {
+    // Start fitVids
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+    // End fitVids
+
+    var progressBar = document.querySelector('progress');
+    var header = document.querySelector('.floating-header');
+    var title = document.querySelector('.post-full-title');
+
+    var lastScrollY = window.scrollY;
+    var lastWindowHeight = window.innerHeight;
+    var lastDocumentHeight = $(document).height();
+    var ticking = false;
+
+    function onScroll() {
+        lastScrollY = window.scrollY;
+        requestTick();
+    }
+
+    function onResize() {
+        lastWindowHeight = window.innerHeight;
+        lastDocumentHeight = $(document).height();
+        requestTick();
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(update);
+        }
+        ticking = true;
+    }
+
+    function update() {
+        var trigger = title.getBoundingClientRect().top + window.scrollY;
+        var triggerOffset = title.offsetHeight + 35;
+        var progressMax = lastDocumentHeight - lastWindowHeight;
+
+        // show/hide floating header
+        if (lastScrollY >= trigger + triggerOffset) {
+            header.classList.add('floating-active');
+        } else {
+            header.classList.remove('floating-active');
+        }
+
+        progressBar.setAttribute('max', progressMax);
+        progressBar.setAttribute('value', lastScrollY);
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    window.addEventListener('resize', onResize, false);
+
+    update();
+});
+</script>
+
+<script>
+
+// NOTE: Scroll performance is poor in Safari
+// - this appears to be due to the events firing much more slowly in Safari.
+//   Dropping the scroll event and using only a raf loop results in smoother
+//   scrolling but continuous processing even when not scrolling
+$(document).ready(function () {
+    // Start fitVids
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+    // End fitVids
+
+    var progressBar = document.querySelector('progress');
+    var header = document.querySelector('.floating-header');
+    var title = document.querySelector('.post-full-title');
+
+    var lastScrollY = window.scrollY;
+    var lastWindowHeight = window.innerHeight;
+    var lastDocumentHeight = $(document).height();
+    var ticking = false;
+
+    function onScroll() {
+        lastScrollY = window.scrollY;
+        requestTick();
+    }
+
+    function onResize() {
+        lastWindowHeight = window.innerHeight;
+        lastDocumentHeight = $(document).height();
+        requestTick();
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(update);
+        }
+        ticking = true;
+    }
+
+    function update() {
+        var trigger = title.getBoundingClientRect().top + window.scrollY;
+        var triggerOffset = title.offsetHeight + 35;
+        var progressMax = lastDocumentHeight - lastWindowHeight;
+
+        // show/hide floating header
+        if (lastScrollY >= trigger + triggerOffset) {
+            header.classList.add('floating-active');
+        } else {
+            header.classList.remove('floating-active');
+        }
+
+        progressBar.setAttribute('max', progressMax);
+        progressBar.setAttribute('value', lastScrollY);
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    window.addEventListener('resize', onResize, false);
+
+    update();
+});
+</script>
+
+<script>
+
+// NOTE: Scroll performance is poor in Safari
+// - this appears to be due to the events firing much more slowly in Safari.
+//   Dropping the scroll event and using only a raf loop results in smoother
+//   scrolling but continuous processing even when not scrolling
+$(document).ready(function () {
+    // Start fitVids
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+    // End fitVids
+
+    var progressBar = document.querySelector('progress');
+    var header = document.querySelector('.floating-header');
+    var title = document.querySelector('.post-full-title');
+
+    var lastScrollY = window.scrollY;
+    var lastWindowHeight = window.innerHeight;
+    var lastDocumentHeight = $(document).height();
+    var ticking = false;
+
+    function onScroll() {
+        lastScrollY = window.scrollY;
+        requestTick();
+    }
+
+    function onResize() {
+        lastWindowHeight = window.innerHeight;
+        lastDocumentHeight = $(document).height();
+        requestTick();
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(update);
+        }
+        ticking = true;
+    }
+
+    function update() {
+        var trigger = title.getBoundingClientRect().top + window.scrollY;
+        var triggerOffset = title.offsetHeight + 35;
+        var progressMax = lastDocumentHeight - lastWindowHeight;
+
+        // show/hide floating header
+        if (lastScrollY >= trigger + triggerOffset) {
+            header.classList.add('floating-active');
+        } else {
+            header.classList.remove('floating-active');
+        }
+
+        progressBar.setAttribute('max', progressMax);
+        progressBar.setAttribute('value', lastScrollY);
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    window.addEventListener('resize', onResize, false);
+
+    update();
+});
+</script>
+
+
+    
+
+</body>
+
+<!-- Mirrored from localhost:2368/zfs-linux-md-raidli-xiang-de-sata-saskong-zhi-qi/ by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 20 Sep 2018 07:25:40 GMT -->
+</html>
