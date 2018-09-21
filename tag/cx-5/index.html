@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-<!-- Mirrored from localhost:2368/tag/cx-5/ by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 21 Sep 2018 02:28:12 GMT -->
+<!-- Mirrored from localhost:2368/tag/cx-5/ by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 21 Sep 2018 03:00:35 GMT -->
 <!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
 <head>
 
@@ -107,7 +107,10 @@ ghost.init({
         </footer>
     </div>
 </article>
-                <article class="post-card post tag-cx-5 no-image">
+                <article class="post-card post tag-cx-5">
+        <a class="post-card-image-link" href="../../mazda-cx-5-2-5l-ti-che/index.html">
+            <div class="post-card-image" style="background-image: url(../../content/images/2018/09/hqdefault-1.jpg)"></div>
+        </a>
     <div class="post-card-content">
         <a class="post-card-content-link" href="../../mazda-cx-5-2-5l-ti-che/index.html">
             <header class="post-card-header">
@@ -156,11 +159,74 @@ ghost.init({
     </script>
     <script src="../../assets/js/infinitescroll1e2d.js?v=4e7d9a8f54"></script>
 
-    
+    <script>
+
+// NOTE: Scroll performance is poor in Safari
+// - this appears to be due to the events firing much more slowly in Safari.
+//   Dropping the scroll event and using only a raf loop results in smoother
+//   scrolling but continuous processing even when not scrolling
+$(document).ready(function () {
+    // Start fitVids
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+    // End fitVids
+
+    var progressBar = document.querySelector('progress');
+    var header = document.querySelector('.floating-header');
+    var title = document.querySelector('.post-full-title');
+
+    var lastScrollY = window.scrollY;
+    var lastWindowHeight = window.innerHeight;
+    var lastDocumentHeight = $(document).height();
+    var ticking = false;
+
+    function onScroll() {
+        lastScrollY = window.scrollY;
+        requestTick();
+    }
+
+    function onResize() {
+        lastWindowHeight = window.innerHeight;
+        lastDocumentHeight = $(document).height();
+        requestTick();
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(update);
+        }
+        ticking = true;
+    }
+
+    function update() {
+        var trigger = title.getBoundingClientRect().top + window.scrollY;
+        var triggerOffset = title.offsetHeight + 35;
+        var progressMax = lastDocumentHeight - lastWindowHeight;
+
+        // show/hide floating header
+        if (lastScrollY >= trigger + triggerOffset) {
+            header.classList.add('floating-active');
+        } else {
+            header.classList.remove('floating-active');
+        }
+
+        progressBar.setAttribute('max', progressMax);
+        progressBar.setAttribute('value', lastScrollY);
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    window.addEventListener('resize', onResize, false);
+
+    update();
+});
+</script>
+
 
     
 
 </body>
 
-<!-- Mirrored from localhost:2368/tag/cx-5/ by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 21 Sep 2018 02:28:12 GMT -->
+<!-- Mirrored from localhost:2368/tag/cx-5/ by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 21 Sep 2018 03:00:35 GMT -->
 </html>
