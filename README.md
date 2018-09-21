@@ -1,4 +1,1 @@
-zulus 的博客
-
-生成自 Ghost。
-
+zulus 的博客生成自 Ghost。
